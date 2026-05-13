@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>С Днём Рождения, Даниэль!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafcff;
+            color: #111827;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button, input, .settings-toggle, .color-dot, .anim-dot, .toggle-switch, .hue-preview, .tab-btn {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .bg-pattern {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='5' y='25' font-size='20'%3E🐾%3C/text%3E%3Ctext x='42' y='55' font-size='16'%3E🐾%3C/text%3E%3Ctext x='58' y='18' font-size='13'%3E🐾%3C/text%3E%3C/svg%3E");
+            background-size: 80px 80px;
+        }
+
+        .particles-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
+        }
+        .particle {
+            position: absolute; pointer-events: none; opacity: 0;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.06));
+            will-change: transform, opacity;
+        }
+        .bubble {
+            position: absolute; pointer-events: none; opacity: 0;
+            border-radius: 50%;
+            will-change: transform, opacity;
+            animation: bubbleFloat linear infinite;
+        }
+        @keyframes bubbleFloat {
+            0% { transform: translateY(105vh) translateX(0) scale(0); opacity: 0; }
+            5% { opacity: 0.7; }
+            20% { transform: translateY(75vh) translateX(3vw) scale(1); }
+            50% { transform: translateY(40vh) translateX(-2vw) scale(1.1); opacity: 0.5; }
+            80% { transform: translateY(15vh) translateX(1vw) scale(0.9); }
+            100% { transform: translateY(-15vh) translateX(0) scale(0.3); opacity: 0; }
+        }
+        @keyframes fallLeft {
+            0% { transform: translateY(-15vh) translateX(0) rotate(0deg); opacity: 0; }
+            6% { opacity: 0.8; } 70% { opacity: 0.5; }
+            100% { transform: translateY(108vh) translateX(-8vw) rotate(-180deg); opacity: 0; }
+        }
+        @keyframes fallRight {
+            0% { transform: translateY(-15vh) translateX(0) rotate(0deg); opacity: 0; }
+            6% { opacity: 0.8; } 70% { opacity: 0.5; }
+            100% { transform: translateY(108vh) translateX(8vw) rotate(180deg); opacity: 0; }
+        }
+        @keyframes fallStraight {
+            0% { transform: translateY(-15vh) translateX(0) rotate(0deg); opacity: 0; }
+            6% { opacity: 0.8; } 70% { opacity: 0.5; }
+            100% { transform: translateY(108vh) translateX(0) rotate(45deg); opacity: 0; }
+        }
+        @keyframes fallSway {
+            0% { transform: translateY(-15vh) translateX(0) rotate(-10deg); opacity: 0; }
+            6% { opacity: 0.8; }
+            25% { transform: translateY(20vh) translateX(4vw) rotate(15deg); }
+            50% { transform: translateY(50vh) translateX(-3vw) rotate(-5deg); opacity: 0.55; }
+            75% { transform: translateY(75vh) translateX(2vw) rotate(10deg); }
+            100% { transform: translateY(108vh) translateX(-1vw) rotate(-20deg); opacity: 0; }
+        }
+        @keyframes fallGentle {
+            0% { transform: translateY(-15vh) translateX(0) rotate(0deg); opacity: 0; }
+            6% { opacity: 0.7; }
+            100% { transform: translateY(108vh) translateX(3vw) rotate(15deg); opacity: 0; }
+        }
+
+        .card {
+            background: white; border-radius: 2rem; padding: 50px 40px 28px;
+            text-align: center; max-width: 650px; width: 100%;
+            position: relative; z-index: 1;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            border: 2px solid #e2e8f0; transition: border-color 0.3s ease;
+        }
+        .card.rainbow-border { border: 2px solid transparent; background-clip: padding-box; }
+        .card.rainbow-border::before {
+            content: '';
+            position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 2rem; z-index: -1;
+            background: conic-gradient(#ef4444,#f59e0b,#eab308,#22c55e,#3b82f6,#8b5cf6,#ef4444);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude; padding: 2px;
+        }
+
+        .settings-toggle {
+            position: absolute; top: 20px; right: 24px; width: 38px; height: 38px;
+            border-radius: 50%; background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226,232,240,0.6);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10; transition: all 0.2s;
+            user-select: none;
+            outline: none;
+        }
+        .settings-toggle:hover { background: rgba(255,255,255,0.9); }
+        .settings-icon { font-size: 1.1rem; color: #6b7280; transition: transform 0.3s ease; line-height: 1; }
+        .settings-toggle.open .settings-icon { transform: rotate(90deg); }
+
+        .settings-dropdown {
+            position: absolute; top: 64px; right: 16px; width: 310px; max-height: 0;
+            overflow-y: auto; overflow-x: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.25s ease;
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); border-radius: 1.25rem;
+            border: 1px solid rgba(226,232,240,0.5); z-index: 20;
+            padding: 0 18px; opacity: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .settings-dropdown.open { max-height: 620px; padding: 14px 18px; opacity: 1; }
+        .settings-dropdown label {
+            display: block; font-size: 0.78rem; font-weight: 600; color: #6b7280;
+            margin-bottom: 4px; text-align: left;
+        }
+
+        .settings-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 0; flex-wrap: wrap; gap: 8px;
+        }
+        .settings-row + .settings-row { border-top: 1px solid rgba(226,232,240,0.5); }
+        .settings-label { font-size: 0.85rem; font-weight: 600; color: #374151; flex-shrink: 0; }
+
+        /* ===== СТЕКЛЯННЫЙ ПЕРЕКЛЮЧАТЕЛЬ (УЗКИЙ, С ТЁМНЫМ ФОНОМ) ===== */
+        .tab-row {
+            display: flex;
+            gap: 4px;
+            background: #e8ecf1;
+            border-radius: 2rem;
+            padding: 3px;
+            width: 100%;
+            border: none;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+            transition: background 0.3s ease;
+            height: 38px;
+            align-items: center;
+        }
+        .tab-btn {
+            flex: 1;
+            height: 32px;
+            padding: 0 10px;
+            border: none;
+            border-radius: 2rem;
+            background: transparent;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            will-change: transform, font-size, color;
+            backface-visibility: hidden;
+        }
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        .tab-btn:not(.active) {
+            color: #94a3b8;
+        }
+        /* ======================================================= */
+
+        .tab-content {
+            overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 120px; opacity: 1;
+        }
+        .tab-content.hidden { max-height: 0; opacity: 0; }
+
+        .color-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0 4px;
+            width: 100%;
+        }
+        .color-dot {
+            width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+            border: 2px solid transparent; transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .color-dot:hover { transform: scale(1.15); }
+        .color-dot.active { transform: scale(1.15); border-color: transparent; box-shadow: none; }
+        .color-dot.blue { background: linear-gradient(180deg,#0f172a 0%,#1e3a5f 50%,#1e40af 100%); }
+        .color-dot.red { background: linear-gradient(180deg,#450a0a 0%,#991b1b 50%,#ef4444 100%); }
+        .color-dot.flat-red { background: #b91c1c; }
+        .color-dot.green { background: linear-gradient(180deg,#052e16 0%,#166534 50%,#22c55e 100%); }
+        .color-dot.flat-green { background: #15803d; }
+        .color-dot.flat-yellow { background: #eab308; }
+        .color-dot.flat-orange { background: #f97316; }
+
+        #tabHue {
+            max-height: 120px;
+            overflow: visible !important;
+        }
+        
+        .hue-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            margin-top: 0;
+            padding: 6px 0 4px;
+            overflow: visible !important;
+            padding-left: 4px; 
+        }
+        
+        .hue-preview {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            flex-shrink: 0;
+            transition: background 0.1s, transform 0.2s;
+            cursor: pointer;
+            background: #3b82f6;
+            display: block;
+            position: relative;
+            z-index: 5;
+        }
+        .hue-preview.active { transform: scale(1.15); }
+
+        .hue-slider-row input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none; appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ec4899, #ef4444);
+            margin: 0; padding: 0;
+        }
+        .hue-slider-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.15);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+        .hue-slider-row input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5), 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+        .hue-slider-row input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+        }
+
+        .anim-options {
+            display: flex; gap: 4px; flex-wrap: wrap;
+            background: #e8ecf1; border-radius: 2rem;
+            padding: 4px; position: relative;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .anim-dot {
+            width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+            border: none;
+            transition: none;
+            background: transparent;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; line-height: 1;
+            position: relative; z-index: 1;
+        }
+        .anim-dot.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06);
+            transition: none;
+        }
+
+        .toggle-switch {
+            position: relative; width: 44px; height: 24px; background: #d1d5db;
+            border-radius: 24px; cursor: pointer; transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .toggle-switch.active {
+            background: linear-gradient(135deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#8b5cf6);
+            background-size: 300% 100%; animation: gradientShift 2s linear infinite;
+        }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 20px; height: 20px; background: white; border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        .toggle-switch.active::after { transform: translateX(20px); }
+
+        .icon {
+            font-size: 70px; margin-bottom: 10px;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.08));
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); }
+        }
+
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; transition: all 0.3s ease; }
+        .subtitle { font-size: 1.5rem; font-weight: 700; margin-bottom: 40px; letter-spacing: 2px; transition: opacity 0.2s; }
+
+        .theme-custom h1, .theme-custom .subtitle,
+        .theme-custom .age-number, .theme-custom .detail-value, .theme-custom .detail-label {
+            color: var(--custom-color); background: none;
+        }
+        .theme-default h1, .theme-default .subtitle,
+        .theme-default .age-number, .theme-default .detail-value, .theme-default .detail-label {
+            background: linear-gradient(180deg,#0f172a 0%,#1e3a5f 50%,#1e40af 100%);
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+        }
+        .theme-red h1, .theme-red .subtitle,
+        .theme-red .age-number, .theme-red .detail-value, .theme-red .detail-label {
+            background: linear-gradient(180deg,#450a0a 0%,#991b1b 50%,#ef4444 100%);
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+        }
+        .theme-flat-red h1, .theme-flat-red .subtitle,
+        .theme-flat-red .age-number, .theme-flat-red .detail-value, .theme-flat-red .detail-label {
+            color: #b91c1c; background: none;
+        }
+        .theme-green h1, .theme-green .subtitle,
+        .theme-green .age-number, .theme-green .detail-value, .theme-green .detail-label {
+            background: linear-gradient(180deg,#052e16 0%,#166534 50%,#22c55e 100%);
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+        }
+        .theme-flat-green h1, .theme-flat-green .subtitle,
+        .theme-flat-green .age-number, .theme-flat-green .detail-value, .theme-flat-green .detail-label {
+            color: #15803d; background: none;
+        }
+        .theme-flat-yellow h1, .theme-flat-yellow .subtitle,
+        .theme-flat-yellow .age-number, .theme-flat-yellow .detail-value, .theme-flat-yellow .detail-label {
+            color: #eab308; background: none;
+        }
+        .theme-flat-orange h1, .theme-flat-orange .subtitle,
+        .theme-flat-orange .age-number, .theme-flat-orange .detail-value, .theme-flat-orange .detail-label {
+            color: #f97316; background: none;
+        }
+
+        h1.rainbow, .subtitle.rainbow, .age-number.rainbow,
+        .detail-value.rainbow, .detail-label.rainbow {
+            animation: rainbowText 3s linear infinite;
+            background: none; color: #3b82f6;
+        }
+        @keyframes rainbowText {
+            0% { color: #ef4444; } 16% { color: #f59e0b; } 33% { color: #eab308; }
+            50% { color: #22c55e; } 66% { color: #3b82f6; } 83% { color: #8b5cf6; } 100% { color: #ef4444; }
+        }
+
+        .age-display { display: inline-block; margin-bottom: 35px; min-width: 180px; max-width: 100%; }
+        .age-number { display: block; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; font-size: clamp(3.5rem,12vw,6.5rem); transition: all 0.3s ease; }
+        .age-label { display: block; font-size: 1.1rem; color: #6b7280; font-weight: 500; letter-spacing: 1px; margin-top: 2px; transition: all 0.3s ease; }
+        .age-label.rainbow { animation: rainbowText 3s linear infinite; }
+
+        .details-list { display: flex; flex-direction: column; gap: 10px; }
+        .detail-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f9fafb; border-radius: 1rem; padding: 16px 25px;
+            border: 1px solid #e2e8f0; transition: all 0.2s;
+        }
+        .detail-row:hover { background: #f3f4f6; border-color: #c7d2fe; }
+        .detail-label { font-size: 0.95rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0; transition: all 0.3s ease; }
+        .detail-value { font-weight: 800; line-height: 1.2; font-size: clamp(1.2rem,4vw,1.8rem); word-break: break-all; text-align: right; margin-left: 15px; letter-spacing: -0.01em; transition: all 0.3s ease; }
+
+        .footer-note {
+            margin-top: 22px; font-size: 0.72rem; font-weight: 400; color: #b0b8c1; letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 500px) {
+            .card { padding: 30px 20px 22px; border-radius: 1.5rem; }
+            .card.rainbow-border::before { border-radius: 1.5rem; }
+            .settings-toggle { top: 14px; right: 16px; width: 34px; height: 34px; }
+            .settings-dropdown { top: 54px; right: 8px; width: 280px; border-radius: 1rem; }
+            h1 { font-size: 2.2rem; } .subtitle { font-size: 1.2rem; }
+            .age-display { min-width: 140px; }
+            .detail-row { padding: 14px 20px; }
+            .detail-label { font-size: 0.85rem; }
+            .detail-value { font-size: clamp(1rem,3.5vw,1.5rem); }
+            .footer-note { font-size: 0.68rem; margin-top: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-pattern"></div>
+    <div class="particles-container" id="particlesContainer"></div>
+
+    <div class="card theme-default" id="mainCard">
+        <div class="settings-toggle" id="settingsToggle">
+            <span class="settings-icon">⚙</span>
+        </div>
+        <div class="settings-dropdown" id="settingsDropdown">
+            <!-- Убрали заголовок "Имя и дата" -->
+            <div class="settings-section" id="infoSection">
+                <div style="padding: 4px 0 12px 0; text-align: left;">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #6b7280; margin-bottom: 2px;">Имя</div>
+                    <div style="font-size: 1.1rem; font-weight: 500; color: #1e1b4b;">Даниэль</div>
+                </div>
+                <div style="padding: 0 0 12px 0; text-align: left;">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #6b7280; margin-bottom: 2px;">Дата рождения</div>
+                    <div style="font-size: 1.1rem; font-weight: 500; color: #1e1b4b;">13.05.2026 10:51</div>
+                </div>
+            </div>
+
+            <!-- СТЕКЛЯННЫЙ ПЕРЕКЛЮЧАТЕЛЬ -->
+            <div class="settings-row" style="border-top:1px solid rgba(226,232,240,0.5); padding-bottom:6px;">
+                <div class="tab-row" style="width:100%;">
+                    <button class="tab-btn active" data-tab="colors">Цвета</button>
+                    <button class="tab-btn" data-tab="hue">Оттенок</button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tabColors">
+                <div class="color-options">
+                    <div class="color-dot blue active" data-theme="default"></div>
+                    <div class="color-dot red" data-theme="red"></div>
+                    <div class="color-dot flat-red" data-theme="flat-red"></div>
+                    <div class="color-dot green" data-theme="green"></div>
+                    <div class="color-dot flat-green" data-theme="flat-green"></div>
+                    <div class="color-dot flat-yellow" data-theme="flat-yellow"></div>
+                    <div class="color-dot flat-orange" data-theme="flat-orange"></div>
+                </div>
+            </div>
+            <div class="tab-content hidden" id="tabHue">
+                <div class="hue-slider-row">
+                    <div class="hue-preview" id="huePreview"></div>
+                    <input type="range" id="hueSlider" min="0" max="360" value="220">
+                </div>
+            </div>
+
+            <div class="settings-row">
+                <span class="settings-label">Анимации</span>
+                <div class="anim-options">
+                    <button class="anim-dot active" data-anim="none" title="Выкл">✕</button>
+                    <button class="anim-dot" data-anim="animals" title="Зверята">🐾</button>
+                    <button class="anim-dot" data-anim="leaves" title="Листья">🍁</button>
+                    <button class="anim-dot" data-anim="snowflakes" title="Снежинки">❄️</button>
+                    <button class="anim-dot" data-anim="bubbles" title="Пузыри">🫧</button>
+                </div>
+            </div>
+            <div class="settings-row">
+                <span class="settings-label">Светодиодный режим</span>
+                <div class="toggle-switch" id="ledToggle"></div>
+            </div>
+        </div>
+
+        <div class="icon">🧸</div>
+        <h1 id="nameDisplay">Даниэль</h1>
+        <p class="subtitle" id="dateDisplay">13.05.2026 10:51</p>
+
+        <div class="age-display">
+            <span class="age-number" id="years">0</span>
+            <span class="age-label" id="ageLabel">лет</span>
+        </div>
+
+        <div class="details-list">
+            <div class="detail-row"><span class="detail-label" id="labelDays">Дней</span><span class="detail-value" id="days">0</span></div>
+            <div class="detail-row"><span class="detail-label" id="labelHours">Часов</span><span class="detail-value" id="hours">0</span></div>
+            <div class="detail-row"><span class="detail-label" id="labelMinutes">Минут</span><span class="detail-value" id="minutes">0</span></div>
+            <div class="detail-row"><span class="detail-label" id="labelSeconds">Секунд</span><span class="detail-value" id="seconds">0</span></div>
+        </div>
+
+        <div class="footer-note">Сайт создан 11.05.2026 специально для Даниэля!</div>
+    </div>
+
+    <script>
+        function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0'); }
+
+        function updateCounter() {
+            const now = new Date();
+            let diff = now - birthDate;
+            if (diff < 0) { ['years','days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = id==='years'?'0.0':'0'); return; }
+            const ms = 1000;
+            document.getElementById('years').textContent = (diff / (ms*60*60*24*365.25) >= 1000 ? Math.round(diff/(ms*60*60*24*365.25)) : (diff/(ms*60*60*24*365.25)).toFixed(1));
+            document.getElementById('days').textContent = formatNumber(Math.floor(diff/(ms*60*60*24)));
+            document.getElementById('hours').textContent = formatNumber(Math.floor(diff/(ms*60*60)));
+            document.getElementById('minutes').textContent = formatNumber(Math.floor(diff/(ms*60)));
+            document.getElementById('seconds').textContent = formatNumber(Math.floor(diff/ms));
+        }
+
+        function applyLedMode() {
+            const card = document.getElementById('mainCard');
+            card.classList.toggle('rainbow-border', ledMode);
+            ['nameDisplay','dateDisplay','years','ageLabel','days','hours','minutes','seconds','labelDays','labelHours','labelMinutes','labelSeconds']
+                .map(id => document.getElementById(id)).forEach(el => el.classList.toggle('rainbow', ledMode));
+        }
+
+        function hslToHex(h, s, l) {
+            s/=100; l/=100; const a=s*Math.min(l,1-l);
+            const f=n=>{const k=(n+h/30)%12; return Math.round(255*(l-a*Math.max(Math.min(k-3,9-k,1),-1))).toString(16).padStart(2,'0');};
+            return `#${f(0)}${f(8)}${f(4)}`;
+        }
+
+        function applyCustomColor(hue) {
+            const hex = hslToHex(hue, 70, 35);
+            document.getElementById('mainCard').style.setProperty('--custom-color', hex);
+            document.getElementById('huePreview').style.background = hex;
+            saveSetting('customHue', hue);
+            if (currentTheme !== 'custom') {
+                document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+                const card = document.getElementById('mainCard');
+                card.classList.remove('theme-default','theme-red','theme-flat-red','theme-green','theme-flat-green','theme-flat-yellow','theme-flat-orange','theme-custom');
+                card.classList.add('theme-custom');
+                document.getElementById('huePreview').classList.add('active');
+                currentTheme = 'custom';
+                saveSetting('theme', 'custom');
+            }
+        }
+
+        function applyTheme(theme) {
+            const card = document.getElementById('mainCard');
+            card.classList.remove('theme-default','theme-red','theme-flat-red','theme-green','theme-flat-green','theme-flat-yellow','theme-flat-orange','theme-custom');
+            if (theme === 'custom') { 
+                card.classList.add('theme-custom'); 
+                const savedHue = parseInt(loadSetting('customHue', '220'));
+                document.getElementById('hueSlider').value = savedHue;
+                applyCustomColor(savedHue);
+                document.getElementById('huePreview').classList.add('active');
+            } else { 
+                card.classList.add('theme-'+theme); 
+                card.style.removeProperty('--custom-color');
+                document.getElementById('huePreview').classList.remove('active');
+                const themeColors = {
+                    'default': '#1e40af',
+                    'red': '#ef4444',
+                    'flat-red': '#b91c1c',
+                    'green': '#22c55e',
+                    'flat-green': '#15803d',
+                    'flat-yellow': '#eab308',
+                    'flat-orange': '#f97316'
+                };
+                document.getElementById('huePreview').style.background = themeColors[theme] || '#3b82f6';
+            }
+            currentTheme = theme; 
+            saveSetting('theme', theme);
+        }
+
+        let spawnTimeout=null;
+        const particlesContainer=document.getElementById('particlesContainer');
+        const sets={animals:['🐻','🧸','🦊','🐰','🐱','🐶','🐼','🐨'],leaves:['🍁','🍂','🍃','🌿','🍀'],snowflakes:['❄️','❄️','❄️','❅','❆','❄️','❄️']};
+        const animNames=['fallLeft','fallRight','fallStraight','fallSway','fallGentle'];
+        const bubbleColors=['rgba(239,68,68,0.3)','rgba(249,115,22,0.3)','rgba(234,179,8,0.3)','rgba(34,197,94,0.3)','rgba(59,130,246,0.3)','rgba(139,92,246,0.3)','rgba(236,72,153,0.3)','rgba(168,85,247,0.3)'];
+
+        function createBubble() {
+            const b=document.createElement('div'); b.className='bubble';
+            const s=12+Math.random()*30; b.style.width=s+'px'; b.style.height=s+'px';
+            b.style.left=Math.random()*90+'vw'; b.style.background=bubbleColors[Math.floor(Math.random()*bubbleColors.length)];
+            b.style.border='1px solid rgba(255,255,255,0.4)'; b.style.boxShadow='inset 0 2px 6px rgba(255,255,255,0.3)';
+            b.style.animationDuration=(8+Math.random()*10)+'s'; b.style.animationDelay=Math.random()*3+'s';
+            particlesContainer.appendChild(b); setTimeout(()=>{if(b.parentNode)b.remove();},18000);
+        }
+
+        function createParticle() {
+            if(currentAnimation==='none') return;
+            if(currentAnimation==='bubbles') { createBubble(); return; }
+            const p=document.createElement('span'); p.className='particle';
+            const set=sets[currentAnimation]||[]; p.textContent=set[Math.floor(Math.random()*set.length)];
+            let s=currentAnimation==='animals'?34+Math.random()*30:currentAnimation==='leaves'?22+Math.random()*26:14+Math.random()*22;
+            p.style.fontSize=s+'px'; p.style.left=Math.random()*90+'vw';
+            p.style.animationName=animNames[Math.floor(Math.random()*animNames.length)];
+            let d=currentAnimation==='leaves'?10+Math.random()*8:currentAnimation==='snowflakes'?8+Math.random()*10:8+Math.random()*8;
+            p.style.animationDuration=d+'s'; p.style.animationDelay=Math.random()*2+'s';
+            p.style.animationTimingFunction='linear'; p.style.animationIterationCount='1'; p.style.animationFillMode='forwards';
+            particlesContainer.appendChild(p); setTimeout(()=>{if(p.parentNode)p.remove();},(d+2)*1000+100);
+        }
+
+        function scheduleParticle() {
+            if(currentAnimation==='none') return;
+            let i=currentAnimation==='leaves'?1000+Math.random()*1500:currentAnimation==='snowflakes'?500+Math.random()*800:currentAnimation==='bubbles'?600+Math.random()*900:1600+Math.random()*2000;
+            spawnTimeout=setTimeout(()=>{createParticle(); scheduleParticle();}, i);
+        }
+
+        function startParticles() {
+            stopParticles();
+            if(currentAnimation==='none') return;
+            let c=currentAnimation==='leaves'?10:currentAnimation==='snowflakes'?14:currentAnimation==='bubbles'?8:6;
+            for(let i=0;i<c;i++) setTimeout(()=>createParticle(), i*300);
+            setTimeout(()=>scheduleParticle(), c*300+400);
+        }
+
+        function stopParticles() { if(spawnTimeout){clearTimeout(spawnTimeout); spawnTimeout=null;} particlesContainer.innerHTML=''; }
+
+        function loadSetting(k,f){try{const v=localStorage.getItem('baby_timer_'+k); return v!==null?v:f;}catch(e){return f;}}
+        function saveSetting(k,v){try{localStorage.setItem('baby_timer_'+k,v);}catch(e){}}
+
+        let displayName='Даниэль';
+        let dateDisplayText='13.05.2026 10:51';
+        let currentTheme=loadSetting('theme','default');
+        let ledMode=loadSetting('ledMode','false')==='true';
+        let currentAnimation=loadSetting('animation','none');
+        let customHue=parseInt(loadSetting('customHue','220'));
+
+        const birthDate = new Date(2026, 4, 13, 10, 51, 0);
+        
+        saveSetting('birthDate', birthDate.toISOString());
+        saveSetting('dateDisplay', dateDisplayText);
+        saveSetting('name', displayName);
+
+        document.getElementById('nameDisplay').textContent=displayName;
+        document.getElementById('dateDisplay').textContent=dateDisplayText;
+        
+        if (currentTheme === 'custom') {
+            applyTheme('custom');
+        } else {
+            applyTheme(currentTheme);
+            document.querySelectorAll('.color-dot').forEach(d => {
+                d.classList.toggle('active', d.dataset.theme === currentTheme);
+            });
+        }
+        
+        document.querySelectorAll('.anim-dot').forEach(d=>d.classList.toggle('active',d.dataset.anim===currentAnimation));
+        if(ledMode){document.getElementById('ledToggle').classList.add('active'); applyLedMode();}
+        if(currentAnimation!=='none') startParticles();
+
+        // Инициализация табов с активной вкладкой Цвета
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabColors = document.getElementById('tabColors');
+        const tabHue = document.getElementById('tabHue');
+        
+        tabBtns.forEach(btn => {
+            if (btn.dataset.tab === 'colors') {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        tabColors.classList.remove('hidden');
+        tabHue.classList.add('hidden');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function(){
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                if(this.dataset.tab === 'colors'){
+                    tabColors.classList.remove('hidden');
+                    tabHue.classList.add('hidden');
+                } else {
+                    tabColors.classList.add('hidden');
+                    tabHue.classList.remove('hidden');
+                }
+            });
+        });
+
+        const hueSlider=document.getElementById('hueSlider');
+        const huePreview=document.getElementById('huePreview');
+        hueSlider.value=customHue;
+        
+        if (currentTheme === 'custom') {
+            applyCustomColor(customHue);
+            huePreview.classList.add('active');
+        } else {
+            huePreview.style.background = hslToHex(customHue, 70, 35);
+        }
+
+        hueSlider.addEventListener('input', function(){
+            const hue = parseInt(this.value);
+            applyCustomColor(hue);
+        });
+
+        const settingsToggle=document.getElementById('settingsToggle');
+        const settingsDropdown=document.getElementById('settingsDropdown');
+        settingsToggle.addEventListener('click',e=>{e.stopPropagation(); settingsDropdown.classList.toggle('open'); settingsToggle.classList.toggle('open');});
+        document.addEventListener('click',e=>{if(!settingsDropdown.contains(e.target)&&e.target!==settingsToggle&&!settingsToggle.contains(e.target)){settingsDropdown.classList.remove('open'); settingsToggle.classList.remove('open');}});
+
+        document.getElementById('ledToggle').addEventListener('click',()=>{ledMode=!ledMode; document.getElementById('ledToggle').classList.toggle('active',ledMode); saveSetting('ledMode',ledMode); applyLedMode();});
+
+        document.querySelectorAll('.color-dot').forEach(dot=>{dot.addEventListener('click',function(){document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active')); this.classList.add('active'); huePreview.classList.remove('active'); applyTheme(this.dataset.theme);});});
+        document.querySelectorAll('.anim-dot').forEach(dot=>{dot.addEventListener('click',function(){document.querySelectorAll('.anim-dot').forEach(d=>d.classList.remove('active')); this.classList.add('active'); currentAnimation=this.dataset.anim; saveSetting('animation',currentAnimation); startParticles();});});
+
+        updateCounter();
+        setInterval(updateCounter, 1000);
+    </script>
+</body>
+</html>
